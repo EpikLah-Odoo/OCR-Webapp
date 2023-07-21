@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Homepage{% endblock %}
+{% block content %}
+<div class="login-form content">
+  <h1>OCR Demo</h1>
+  <p>Click on the "Choose File" button to upload a PDF file:</p>
+  <div style="text-align: center;">
+      <form method="post" enctype="multipart/form-data" id="upload-form">
+          {% csrf_token %}
+          <input type="file" name="upload" accept=".pdf" id="file-input" autocomplete="off" multiple>
+          <br>
+          <br>
+          <button id="upload-button" style="text-align: center;" class="btn btn-dark" type="submit">Submit</button> 
+          <!-- <button onclick="update()" class="btn btn-dark" type="submit">Submit</button>           -->
+      </form>
+      <!-- <div id="progress-bar" ></div> -->
+  </div>
+  
+  <div style="position: absolute;" id="Progress_Status">
+    <div id="myprogressBar" style="display: none;" ></div>
+  </div>
+  <!-- <script>
+    function update() {
+      var element = document.getElementById("myprogressBar"); 
+      // element.show();  
+      // element.style.width = '0%';
+      // element.classList.toggle('show-progress-bar');
+      var width = 1;
+      var identity = setInterval(scene, 10);
+      function scene() {
+        if (width >= 100) {
+          clearInterval(identity);
+        } else {
+          width++; 
+          element.style.width = width + '%'; 
+        }
+      }
+    }
+  </script> -->
+  <script>
+    $(document).ready(function() {
+    $('#upload-button').on('submit', function(e) {
+        e.preventDefault();
+        var progressBar = $('#myprogressBar');
+        progressBar.css('width', '0%');
+        progressBar.show();
+        var startTime = new Date().getTime();
+        var endTime = startTime + 30000; // 30 seconds
+
+        function updateProgress() {
+            var currentTime = new Date().getTime();
+            var elapsed = currentTime - startTime;
+            var progress = Math.min((elapsed / 30000) * 100, 100); // Calculate progress percentage
+
+            progressBar.css('width', progress + '%');
+
+            if (currentTime < endTime) {
+                setTimeout(updateProgress, 500); // Update progress every 500 milliseconds
+            } else {
+                console.log('Upload complete!');
+                window.location.href = "{% url 'homepage:sftp' %}"; // Redirect to another page
+            }
+        }
+        setTimeout(updateProgress, 500);
+      });
+    });
+
+  </script>
+  
+</div>
+{% endblock %}
+  

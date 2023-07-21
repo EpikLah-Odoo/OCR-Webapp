@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Homepage{% endblock %}
+{% block content %}
+    <h3 style="padding: 5px 5px;">PDF Files List</h3>
+    <ul style="padding: 5px 5px;" >
+        {% for data in data_list %}    
+            <li>
+                <a href="#" onclick="loadfile('{{ data.base64 }}', '{{ data.spreadsheet_url }}')">{{ data.filename }}</a>
+            </li>
+            <script>
+                // setInterval(loadfile, 5000)
+                function loadfile(base64, spreadsheetUrl) {
+                    const iframe1 = document.getElementById('pdf-iframe');
+                    iframe1.src = "data:application/pdf;base64," + base64;
+                    const iframe2 = document.getElementById('spreadsheet-iframe');
+                    iframe2.src = spreadsheetUrl;
+                }
+            </script>
+        {% empty %}
+            <p>No data found</p>
+        {% endfor %}
+    </ul>    
+    <div class="container">
+        <div class="iframe-container lazyload">
+            <iframe id="pdf-iframe" src="" class="iframe">PDF Review</iframe>
+        </div>
+        <div class="iframe-container lazyload">
+            <iframe id="spreadsheet-iframe" src="" class="iframe" >Spreadsheet Review</iframe> 
+        </div>
+    </div>
+
+{% endblock %}
+
+
+    
+    
+    
+
+
+

@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ssh2-sftp-client/dist/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
+   
+</head>
+<body>
+    <div id="header">
+        <span><img src="{% static 'images/pericom.png' %}" alt="Logo" class="logo-image logo"></span>
+        <!-- <span class="logo">Epiklah</span> -->
+        {% if request.user.is_authenticated %}
+        <div class="navbar">
+            <a href="/">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Custom Invoices OCR 
+                  <i class="fa fa-caret-down"></i>
+                </button>
+                <div class="dropdown-content">
+                  <a href="{% url 'homepage:homepage' %}">Upload Files</a>
+                  <a href="{% url 'homepage:validation' %}">Validation</a>
+                  
+                </div>
+              </div> 
+            <div class="dropdown">
+              <button class="dropbtn">General Invoices OCR
+                <i class="fa fa-caret-down"></i>
+              </button>
+              <div class="dropdown-content">
+                <a href="{% url 'homepage:homepage_invoices' %}">Upload files</a>
+                <a href="{% url 'homepage:validation_invoices' %}">Validation</a>                
+              </div>
+            </div> 
+          </div>
+        {% endif %}
+        <span class="user">
+            {% if request.user.is_authenticated %}
+                Hello {{ request.user.first_name|default:request.user.username }},
+                <a href="{% url 'homepage:logged_out' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'homepage:login' %}">Log-in</a>
+            {% endif %}
+        </span>
+    </div>
+    <div class="content" id="content" >
+        {% block content %}
+        {% endblock %}
+    </div>
+    <div id="footer">
+      Powered by EpikLah.sg
+  </div>
+</body>
+</html>

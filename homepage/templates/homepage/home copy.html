@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Homepage{% endblock %}
+{% block content %}
+<div class="login-form content">
+  <h1>OCR Demo</h1>
+  <p>Click on the "Choose File" button to upload a PDF file:</p>
+  <div style="text-align: center;">
+      <form method="post" enctype="multipart/form-data" id="upload-form">
+          {% csrf_token %}
+          <!-- <input type="file" name="upload" accept=".pdf" id="file-input" autocomplete="off" multiple> -->
+          <input type="file" name="files[]" accept=".pdf" id="file-input" autocomplete="off" multiple>
+          <br>
+          <br>
+          <!-- <button id="upload-button" style="text-align: center;" class="btn btn-dark" type="submit">Submit</button>  -->
+          <button id="submit-btn" style="text-align: center;" class="btn btn-dark" type="submit">Submit</button>
+      </form>
+      <!-- <div id="progress-bar" ></div> -->
+  </div>
+  
+  <div style="position: absolute;" id="Progress_Status">
+    <div id="myprogressBar" style="display:none;" ></div>
+    <span id="progress-text"></span>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/ssh2-sftp-client/dist/index.js"></script>
+  <!-- <script>
+    $(document).ready(function() {
+    $('#upload-form').on('submit', function(e) {
+        e.preventDefault();
+        var progressBar = $('#myprogressBar');
+        progressBar.css('width', '0%');
+        progressBar.show();
+        var startTime = new Date().getTime();
+        var endTime = startTime + 30000; // 30 seconds
+
+        function updateProgress() {
+            var currentTime = new Date().getTime();
+            var elapsed = currentTime - startTime;
+            var progress = Math.min((elapsed / 30000) * 100, 100); // Calculate progress percentage
+
+            progressBar.css('width', progress + '%');
+
+            if (currentTime < endTime) {
+                setTimeout(updateProgress, 500); // Update progress every 500 milliseconds
+            } else {
+                console.log('Upload complete!');
+                window.location.href = "{% url 'homepage:sftp' %}"; // Redirect to another page
+            }
+        }
+        setTimeout(updateProgress, 500);
+      });
+    });
+
+  </script> -->
+  <!-- <script>
+    $(document).ready(function() {
+      $('#upload-form').on('submit', function(e) {
+        e.preventDefault();
+        var progressBar = $('#myprogressBar');
+        progressBar.css('width', '0%');
+        progressBar.show();
+
+        // var formData = new FormData(this); 
+        // var fileInput = document.getElementById('file-input');
+        // var files = fileInput.files;
+        // for (var i = 0; i < files.length; i++) {
+        //   formData.append(files[i]);
+        // }
+        var fileInput = document.getElementById('file-input');
+        var files = fileInput.files;
+        
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+          formData.append('files[]', files[i]);
+        }
+        console.log(files);
+
+        $.ajax({
+          url: "{% url 'homepage:sftp' %}", // Replace with the appropriate URL for your Django view function
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          xhr: function() {
+            var xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function(event) {
+              if (event.lengthComputable) {
+                var percentComplete = (event.loaded / event.total) * 100;
+                progressBar.css('width', percentComplete + '%');
+              }
+            });
+            return xhr;
+          },
+          success: function(response) {
+            console.log('Upload complete!');
+            window.location.href = "{% url 'homepage:sftp' %}"; // Redirect to another page
+          }
+        });
+      });
+    });
+
+   </script> -->
+   
+  <!-- <script>
+    $(document).ready(function() {
+  // Get the CSRF token from the cookie
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      var cookies = document.cookie.split(';');
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  $('#upload-form').on('submit', function(e) {
+    e.preventDefault();
+    var progressBar = $('#myprogressBar');
+    progressBar.css('width', '0%');
+    progressBar.show();
+
+    // var formData = new FormData(this); // Create FormData object with the form data
+    var fileInput = document.getElementById('file-input');
+    var files = fileInput.files;
+    console.log(files);
+    var formData = new FormData();
+    for (var i = 0; i < files.length; i++) {
+      formData.append('files[]', files[i]);
+    }
+    
+    // Get the CSRF token
+    var csrftoken = getCookie('csrftoken');
+
+    // Set the CSRF token in the AJAX request headers
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+          xhr.setRequestHeader('X-CSRFToken', csrftoken);
+        }
+      }
+    });
+
+    $.ajax({
+      url: "{% url 'homepage:sftp' %}", // Replace with the appropriate URL for your Django view function
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      xhr: function() {
+        var xhr = new window.XMLHttpRequest();
+        xhr.upload.addEventListener('progress', function(event) {
+          if (event.lengthComputable) {
+            var percentComplete = (event.loaded / event.total) * 100;
+            progressBar.css('width', percentComplete + '%');
+          }
+        });
+        return xhr;
+      },
+      success: function(response) {
+        console.log('Upload complete!');
+        // window.location.href = "{% url 'homepage:sftp' %}"; // Redirect to another page
+      }
+    });
+  });
+});
+
+  </script> -->
+
+</div>
+{% endblock %}
+  

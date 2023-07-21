@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Homepage{% endblock %}
+{% block content %}
+
+<div class="login-form content">
+  <h1>General Invoices OCR Demo</h1>
+  <p>Click on the "Choose File" button to upload a PDF file:</p>
+  <div style="text-align: center;">
+      <form method="post" enctype="multipart/form-data" id="upload-form">
+          {% csrf_token %}
+          <input type="file" name="files[]" accept=".pdf" id="file-input" autocomplete="off" multiple>
+          <br>
+          <br>
+          <!-- <button id="submit-btn" style="position:fixed; left:49%; top:40%;" class="btn btn-dark" type="submit">Submit</button> -->
+          <button id="submit-btn" class="submit-button" type="submit">Submit</button>
+      </form>
+  </div>
+  
+  <div style="position: absolute;" id="Progress_Status">
+    <div id="myprogressBar" style="display:none;" ></div>
+    <span id="progress-text"></span>
+  </div>
+  
+</div>
+<!-- <script>
+  document.getElementById('upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Disable the submit button
+    document.getElementById('submit-btn').disabled = true;
+    
+    // Show the progress bar
+    var progressContainer = document.getElementById('Progress_Status');
+    // progressContainer.style.display = 'block';
+    
+    var progressBar = document.getElementById('myprogressBar');
+    progressBar.style.display = 'block';
+    var progressText = document.getElementById('progress-text');
+    progressBar.style.width = '0%';
+    
+    var files = document.querySelector('input[type="file"]').files;
+    var numFiles = files.length;
+    var totalTime = numFiles * 60000; // Number of files multiplied by 60 seconds
+    
+    var startTime = new Date().getTime();
+    var endTime = startTime + totalTime;
+
+
+    // Submit the form asynchronously using AJAX
+    var formData = new FormData(this);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', this.action, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // File upload completed successfully
+        // ...
+        
+      } else if (xhr.readyState === 4 && xhr.status !== 200) {
+        // File upload failed
+        // ...
+      }
+    };
+    xhr.send(formData);
+
+    
+    function updateProgress() {
+      var currentTime = new Date().getTime();
+      var elapsed = currentTime - startTime;
+      var progress = Math.min((elapsed / totalTime) * 100, 100);
+      
+      progressBar.style.width = progress + '%';
+      progressText.textContent = 'Progress: ' + progress.toFixed(2) + '%';
+      
+      if (currentTime < endTime) {
+        setTimeout(updateProgress, 500); // Update progress every 500 milliseconds
+      } else {
+        progressText.textContent = 'Upload complete!';
+        window.location.href = "/sftp_invoices/";
+        // Redirect or update UI as needed
+        // ...
+        // Enable the submit button
+        document.getElementById('submit-btn').disabled = false;
+        // Hide the progress bar
+        progressContainer.style.display = 'none';
+      }
+    }
+    
+    setTimeout(updateProgress, 500);
+    
+    // // Submit the form asynchronously using AJAX
+    // var formData = new FormData(this);
+    // var xhr = new XMLHttpRequest();
+    // xhr.open('POST', this.action, true);
+    // xhr.onreadystatechange = function() {
+    //   if (xhr.readyState === 4 && xhr.status === 200) {
+    //     // File upload completed successfully
+    //     // ...
+        
+    //   } else if (xhr.readyState === 4 && xhr.status !== 200) {
+    //     // File upload failed
+    //     // ...
+    //   }
+    // };
+    // xhr.send(formData);
+});
+</script> -->
+
+<script>
+  document.getElementById('upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var files = document.querySelector('input[type="file"]').files;
+    var numFiles = files.length;
+    if (files.length === 0) {
+      // No files selected, display an alert message
+      alert('Please select one or more files.');
+      return;
+    }
+    // Disable the submit button
+    document.getElementById('submit-btn').disabled = true;
+    
+    // Show the progress bar
+    var progressBar = document.getElementById('myprogressBar');
+    progressBar.style.display = 'block';
+    var progressText = document.getElementById('progress-text');
+    progressBar.style.width = '0%';
+
+    var formData = new FormData(this);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', this.action, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        // File upload completed successfully
+        // ...
+        
+      } else if (xhr.readyState === 4 && xhr.status !== 200) {
+        // File upload failed
+        // ...
+      }
+    };
+    xhr.send(formData);
+    
+   
+    
+    var promises = []; // Array to store the promises
+    // Process each PDF file and create a promise for each
+    for (var i = 0; i < numFiles; i++) {
+      var file = files[i];
+      
+      var promise = new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() {
+          var arrayBuffer = this.result;
+          
+          pdfjsLib.getDocument(arrayBuffer).promise.then(function(pdf) {
+            var numPages = pdf.numPages;
+            resolve(numPages); // Resolve the promise with the number of pages
+          });
+        };
+        
+        reader.onerror = function(error) {
+          reject(error); // Reject the promise in case of an error
+        };
+        
+        reader.readAsArrayBuffer(file);
+      });
+      
+      promises.push(promise); // Add the promise to the array
+    }
+    
+    // Wait for all promises to be resolved
+    Promise.all(promises).then(function(results) {
+      // Calculate the maximum number of pages
+      var maxPages = Math.max(...results);
+      
+      // Calculate the total progress bar time
+      // var totalTime = maxPages * 60000; // Assuming 60 seconds per page
+      var totalTime = 60000 + 10000 * (numFiles + maxPages - 2);
+
+      var startTime = new Date().getTime();
+      var endTime = startTime + totalTime;
+    
+    function updateProgress() {
+      var currentTime = new Date().getTime();
+      var elapsed = currentTime - startTime;
+      var progress = Math.min((elapsed / totalTime) * 100, 100);
+      
+      progressBar.style.width = progress + '%';
+      progressText.textContent = 'Progress: ' + progress.toFixed(2) + '%';
+      
+      if (currentTime < endTime) {
+        setTimeout(updateProgress, 500); // Update progress every 500 milliseconds
+      } else {
+        progressText.textContent = 'Upload complete!';
+        window.location.href = "/sftp_invoices/";
+        // Redirect or update UI as needed
+        // ...
+        // Enable the submit button
+        document.getElementById('submit-btn').disabled = false;
+        // Hide the progress bar
+        progressBar.style.display = 'none';
+      }
+    }
+    
+    setTimeout(updateProgress, 500);
+  });
+});
+</script>
+
+
+{% endblock %}
+  
